@@ -1,4 +1,4 @@
-package "parsemail"
+package parsemail
 
 import (
 	"encoding/base64"
