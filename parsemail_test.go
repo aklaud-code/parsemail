@@ -403,6 +403,34 @@ So, "Hello".`,
 			htmlBody:  "<div dir=\"ltr\"><div>Time for the egg.</div><div><br></div><div><br><br></div></div>",
 			textBody:  "Time for the egg.",
 		},
+		14: {
+			mailData:    data3,
+			contentType: `multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf`,
+			content:     "",
+			subject:     "Peter Paholík",
+			from: []mail.Address{
+				{
+					Name:    "Peter Paholík",
+					Address: "peter.paholik@gmail.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "",
+					Address: "dusan@kasan.sk",
+				},
+			},
+			messageID: "CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com",
+			date:      parseDate("Fri, 07 Apr 2017 09:17:26 +0200"),
+			htmlBody:  "<div dir=\"ltr\"><br></div>",
+			attachments: []attachmentData{
+				{
+					filename:    "Peter Paholík 1 4 2017 2017-04-07.json",
+					contentType: "application/json",
+					data:        "[1, 2, 3]",
+				},
+			},
+		},
 	}
 
 	for index, td := range testData {
