@@ -431,31 +431,6 @@ So, "Hello".`,
 				},
 			},
 		},
-		15: {
-			contentType: "multipart/alternative; boundary=\"000000000000ab2e1f05a26de586\"",
-			mailData:    base64Content,
-			subject:     "Saying Hello",
-			from: []mail.Address{
-				{
-					Name:    "John Doe",
-					Address: "jdoe@machine.example",
-				},
-			},
-			sender: mail.Address{
-				Name:    "Michael Jones",
-				Address: "mjones@machine.example",
-			},
-			to: []mail.Address{
-				{
-					Name:    "Mary Smith",
-					Address: "mary@example.net",
-				},
-			},
-			messageID: "1234@local.machine.example",
-			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
-			htmlBody:  "<div dir=\"ltr\">👍</div>",
-			textBody:  "👍",
-		},
 		16: {
 			contentType: "text/plain; charset=utf-8",
 			mailData:    rfc2045exampleA,
@@ -812,6 +787,7 @@ Content-Type: text/html; charset=UTF-8
 <div dir="ltr"><br></div>
 
 --f403045f1dcc043a3f054c8e6bbd--
+
 --f403045f1dcc043a44054c8e6bbf
 Content-Type: application/json;
 	name="=?UTF-8?Q?Peter_Paholi=CC=81k_1?=
@@ -1072,24 +1048,6 @@ Content-Disposition: attachment;
 --f403045f1dcc043a44054c8e6bbf--
 `
 
-var base64Content = `MIME-Version: 1.0
-From: John Doe <jdoe@machine.example>
-Sender: Michael Jones <mjones@machine.example>
-To: Mary Smith <mary@example.net>
-Subject: Saying Hello
-Date: Fri, 21 Nov 1997 09:55:06 -0600
-Message-ID: <1234@local.machine.example>
-Content-Type: multipart/alternative; boundary="000000000000ab2e1f05a26de586"
---000000000000ab2e1f05a26de586
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: base64
-8J+RjQo=
---000000000000ab2e1f05a26de586
-Content-Type: text/html; charset="UTF-8"
-Content-Transfer-Encoding: base64
-PGRpdiBkaXI9Imx0ciI+8J+RjTwvZGl2Pgo=
---000000000000ab2e1f05a26de586--
-`
 
 var rfc2045exampleA = `From 0100017fcf817777-481efc68-4a9a-4c11-ba2c-40ff0357e7b1-000000@amazonses.com  Mon Mar 28 07:50:43 2022
 Return-Path: <0100017fcf817777-481efc68-4a9a-4c11-ba2c-40ff0357e7b1-000000@amazonses.com>
@@ -1280,11 +1238,13 @@ Message-ID: <1234@local.machine.example>
 Subject: ooops
 To: test@example.rocks
 Content-Type: multipart/related; boundary="000000000000ab2e2205a26de587"
+
 --000000000000ab2e2205a26de587
 Content-Type: multipart/alternative; boundary="000000000000ab2e1f05a26de586"
 --000000000000ab2e1f05a26de586
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
+
 Time for the egg. Should we hardboil the egg or fry it. We can scramble it =
 or poach it.
 --000000000000ab2e1f05a26de586
@@ -1300,3 +1260,37 @@ t.</div>
 --000000000000ab2e1f05a26de586--
 --000000000000ab2e2205a26de587--
 `
+
+var data3 = `MIME-Version: 1.0
+From: =?UTF-8?Q?Peter_Pahol=C3=ADk?= <peter.paholik@gmail.com>
+Date: Fri, 7 Apr 2017 09:17:26 +0200
+Message-ID: <CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com>
+Subject: =?UTF-8?Q?Peter_Pahol=C3=ADk?=
+To: dusan@kasan.sk
+Content-Type: multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf
+
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: multipart/alternative; boundary=f403045f1dcc043a3f054c8e6bbd
+--f403045f1dcc043a3f054c8e6bbd
+Content-Type: text/plain; charset=UTF-8
+--f403045f1dcc043a3f054c8e6bbd
+Content-Type: text/html; charset=UTF-8
+<div dir="ltr"><br></div>
+--f403045f1dcc043a3f054c8e6bbd--
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: application/json;
+	name="=?UTF-8?Q?Peter_Paholi=CC=81k_1?=
+	=?UTF-8?Q?_4_2017_2017=2D04=2D07=2Ejson?="
+Content-Disposition: attachment;
+	filename="=?UTF-8?Q?Peter_Paholi=CC=81k_1?=
+	=?UTF-8?Q?_4_2017_2017=2D04=2D07=2Ejson?="
+Content-Transfer-Encoding: BASE64
+X-Attachment-Id: f_j17i0f0d0
+WzEsIDIsIDNd
+--f403045f1dcc043a44054c8e6bbf--
+`
+
+// var textPlainInMultipart = `From: Rares <rares@example.com>
+// Date: Thu, 2 May 2019 11:25:35 +0300
+// Subject: Re: kern/54143 (virtualbox)
+// `
