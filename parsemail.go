@@ -45,9 +45,31 @@ func Parse(r io.Reader) (email Email, err error) {
 		email.TextBody, email.HTMLBody, email.EmbeddedFiles, err = parseMultipartRelated(msg.Body, params["boundary"])
 	case contentTypeTextPlain:
 		message, _ := io.ReadAll(msg.Body)
+		var reader io.Reader
+		reader, err = decodeContent(strings.NewReader(string(message[:])), msg.Header.Get("Content-Transfer-Encoding"))
+		if err != nil {
+			return
+		}
+
+		message, err = io.ReadAll(reader)
+		if err != nil {
+			return
+		}
+
 		email.TextBody = strings.TrimSuffix(string(message[:]), "\n")
 	case contentTypeTextHtml:
 		message, _ := io.ReadAll(msg.Body)
+		var reader io.Reader
+		reader, err = decodeContent(strings.NewReader(string(message[:])), msg.Header.Get("Content-Transfer-Encoding"))
+		if err != nil {
+			return
+		}
+
+		message, err = io.ReadAll(reader)
+		if err != nil {
+			return
+		}
+
 		email.HTMLBody = strings.TrimSuffix(string(message[:]), "\n")
 	default:
 		email.Content, err = decodeContent(msg.Body, msg.Header.Get("Content-Transfer-Encoding"))
@@ -120,14 +142,26 @@ func parseMultipartRelated(msg io.Reader, boundary string) (textBody, htmlBody s
 
 		switch contentType {
 		case contentTypeTextPlain:
-			ppContent, err := io.ReadAll(part)
+			message, _ := io.ReadAll(part)
+			reader, err := decodeContent(strings.NewReader(string(message[:])), part.Header.Get("Content-Transfer-Encoding"))
+			if err != nil {
+				return textBody, htmlBody, embeddedFiles, err
+			}
+
+			ppContent, err := io.ReadAll(reader)
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
 			}
 
 			textBody += strings.TrimSuffix(string(ppContent[:]), "\n")
 		case contentTypeTextHtml:
-			ppContent, err := io.ReadAll(part)
+			message, _ := io.ReadAll(part)
+			reader, err := decodeContent(strings.NewReader(string(message[:])), part.Header.Get("Content-Transfer-Encoding"))
+			if err != nil {
+				return textBody, htmlBody, embeddedFiles, err
+			}
+
+			ppContent, err := io.ReadAll(reader)
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
 			}
@@ -177,14 +211,26 @@ func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBo
 
 		switch contentType {
 		case contentTypeTextPlain:
-			ppContent, err := io.ReadAll(part)
+			message, _ := io.ReadAll(part)
+			reader, err := decodeContent(strings.NewReader(string(message[:])), part.Header.Get("Content-Transfer-Encoding"))
+			if err != nil {
+				return textBody, htmlBody, embeddedFiles, err
+			}
+
+			ppContent, err := io.ReadAll(reader)
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
 			}
 
 			textBody += strings.TrimSuffix(string(ppContent[:]), "\n")
 		case contentTypeTextHtml:
-			ppContent, err := io.ReadAll(part)
+			message, _ := io.ReadAll(part)
+			reader, err := decodeContent(strings.NewReader(string(message[:])), part.Header.Get("Content-Transfer-Encoding"))
+			if err != nil {
+				return textBody, htmlBody, embeddedFiles, err
+			}
+
+			ppContent, err := io.ReadAll(reader)
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
 			}
@@ -363,6 +409,8 @@ func decodeContent(content io.Reader, encoding string) (io.Reader, error) {
 		}
 
 		return bytes.NewReader(dd), nil
+	case "8bit":
+		return content, nil
 	case "":
 		return content, nil
 	default:
@@ -382,6 +430,9 @@ func (hp headerParser) parseAddress(s string) (ma *mail.Address) {
 
 	if strings.Trim(s, " \n") != "" {
 		ma, hp.err = mail.ParseAddress(s)
+		if hp.err != nil {
+			fmt.Println(hp.err)
+		}
 
 		return ma
 	}
@@ -396,6 +447,9 @@ func (hp headerParser) parseAddressList(s string) (ma []*mail.Address) {
 
 	if strings.Trim(s, " \n") != "" {
 		ma, hp.err = mail.ParseAddressList(s)
+		if hp.err != nil {
+			fmt.Println(hp.err)
+		}
 		return
 	}
 
