@@ -275,6 +275,15 @@ func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody str
 			continue
 		}
 
+		if isEmbeddedFile(part) {
+			ef, err := decodeEmbeddedFile(part)
+			if err != nil {
+				return textBody, htmlBody, attachments, embeddedFiles, err
+			}
+			embeddedFiles = append(embeddedFiles, ef)
+			continue
+		}
+
 		contentType, params, err := mime.ParseMediaType(part.Header.Get("Content-Type"))
 		if err != nil {
 			return textBody, htmlBody, attachments, embeddedFiles, err
@@ -304,8 +313,11 @@ func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody str
 			}
 
 			htmlBody += strings.TrimSuffix(string(ppContent[:]), "\n")
+		} else if (contentType == contentTypeMultipartMixed){
+			//Just passing on this for the moment
+			return textBody, htmlBody, attachments, embeddedFiles, nil
 		} else {
-			return textBody, htmlBody, attachments, embeddedFiles, fmt.Errorf("Unknown multipart/mixed nested mime type: %s", contentType)
+			return textBody, htmlBody, attachments, embeddedFiles, fmt.Errorf("unknown multipart/mixed nested mime type: %s", contentType)
 		}
 	}
 
@@ -368,7 +380,6 @@ func decodeEmbeddedFile(part *multipart.Part) (ef EmbeddedFile, err error) {
 }
 
 func isAttachment(part *multipart.Part) bool {
-	fmt.Println(part.FileName())
 	return part.FileName() != "" || strings.EqualFold(part.Header.Get("Content-Disposition"), "attachment")
 }
 
