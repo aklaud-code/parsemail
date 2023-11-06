@@ -7,6 +7,7 @@ import (
 	"io"
 	"mime"
 	"mime/multipart"
+	"mime/quotedprintable"
 	"net/mail"
 	"strings"
 	"time"
@@ -44,6 +45,7 @@ func Parse(r io.Reader) (email Email, err error) {
 	case contentTypeMultipartRelated:
 		email.TextBody, email.HTMLBody, email.EmbeddedFiles, err = parseMultipartRelated(msg.Body, params["boundary"])
 	case contentTypeTextPlain:
+		msg.Body, _ = decodeContent(msg.Body, msg.Header.Get("Content-Transfer-Encoding"))
 		message, _ := io.ReadAll(msg.Body)
 		var reader io.Reader
 		reader, err = decodeContent(strings.NewReader(string(message[:])), msg.Header.Get("Content-Transfer-Encoding"))
@@ -58,6 +60,7 @@ func Parse(r io.Reader) (email Email, err error) {
 
 		email.TextBody = strings.TrimSuffix(string(message[:]), "\n")
 	case contentTypeTextHtml:
+		msg.Body, _ = decodeContent(msg.Body, msg.Header.Get("Content-Transfer-Encoding"))
 		message, _ := io.ReadAll(msg.Body)
 		var reader io.Reader
 		reader, err = decodeContent(strings.NewReader(string(message[:])), msg.Header.Get("Content-Transfer-Encoding"))
@@ -411,6 +414,8 @@ func decodeContent(content io.Reader, encoding string) (io.Reader, error) {
 		return bytes.NewReader(dd), nil
 	case "8bit":
 		return content, nil
+	case "quoted-printable":
+		return quotedprintable.NewReader(content), nil
 	case "":
 		return content, nil
 	default:
