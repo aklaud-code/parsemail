@@ -368,7 +368,8 @@ func decodeEmbeddedFile(part *multipart.Part) (ef EmbeddedFile, err error) {
 }
 
 func isAttachment(part *multipart.Part) bool {
-	return part.FileName() != ""
+	fmt.Println(part.FileName())
+	return part.FileName() != "" || strings.EqualFold(part.Header.Get("Content-Disposition"), "attachment")
 }
 
 func decodeAttachment(part *multipart.Part) (at Attachment, err error) {
